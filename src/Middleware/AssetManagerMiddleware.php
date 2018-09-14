@@ -2,6 +2,8 @@
 
 namespace Reliv\AssetManagerExpressive\Middleware;
 
+use Interop\Http\ServerMiddleware\DelegateInterface;
+use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Reliv\AssetManagerExpressive\Service\AssetManager;
@@ -9,7 +11,7 @@ use Reliv\AssetManagerExpressive\Service\AssetManager;
 /**
  * @author James Jervis - https://github.com/jerv13
  */
-class AssetManagerMiddleware
+class AssetManagerMiddleware implements MiddlewareInterface
 {
     /**
      * @var \Reliv\AssetManagerExpressive\Service\AssetManager
@@ -26,22 +28,20 @@ class AssetManagerMiddleware
     }
 
     /**
-     * __invoke
+     * process
      *
      * @param ServerRequestInterface $request
-     * @param ResponseInterface      $response
-     * @param callable|null          $next
+     * @param DelegateInterface|null $delegate
      *
      * @return ResponseInterface
      * @throws \Exception
      */
-    public function __invoke(
+    public function process(
         ServerRequestInterface $request,
-        ResponseInterface $response,
-        callable $next = null
+        DelegateInterface $delegate = null
     ) {
         if (!$this->assetManager->resolvesToAssetPsr($request)) {
-            return $next($request, $response);
+            return $delegate->process($request);
         }
 
         return $this->assetManager->setAssetOnResponsePsr();
